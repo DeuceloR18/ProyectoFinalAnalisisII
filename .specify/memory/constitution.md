@@ -1,50 +1,106 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+
+# Constitución del sistema de administración de turnos
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Desarrollo guiado por especificaciones
+Ninguna funcionalidad se implementa sin una especificación aprobada. El orden
+obligatorio es: problema, requerimiento, especificación, diseño, tarea,
+implementación y prueba. Cada etapa debe apoyarse en el resultado aprobado de
+la etapa anterior. Esto evita construir comportamientos sin necesidad o
+criterios compartidos.
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+### II. Trazabilidad
+Cada especificación tiene un identificador único secuencial con el formato
+`SPEC-01`, `SPEC-02`, etc. Las tareas, commits y pruebas relacionados deben
+referenciar el identificador de la especificación correspondiente. No se
+considera completa una entrega si no puede rastrearse desde la especificación
+hasta su evidencia de prueba.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+### III. Criterios de aceptación verificables
+Toda especificación debe definir reglas de negocio, restricciones y criterios
+de aceptación verificables. Cada criterio se expresa en formato
+Dado/Cuando/Entonces y describe un resultado observable, para que el equipo
+pueda determinar objetivamente si la funcionalidad satisface el requerimiento.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### IV. Arquitectura en capas con C#/.NET
+La solución se organiza en las capas Domain, Application, Infrastructure y Web.
+Domain no depende de ninguna otra capa. Las reglas de negocio pertenecen a
+Domain o Application, nunca a la interfaz Web ni a la base de datos. Los cambios
+deben mantener esas responsabilidades y no acoplar el dominio a detalles de
+presentación o persistencia.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### V. Alcance mínimo viable
+El producto se limita al flujo mínimo viable definido por especificaciones
+aprobadas. No se agregan funcionalidades, automatizaciones ni cambios de alcance
+que no estén incluidos en una especificación aprobada. Esta restricción mantiene
+el trabajo enfocado en los objetivos del proyecto final.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+### VI. Pruebas con evidencia
+Cada criterio de aceptación debe estar cubierto por al menos una prueba unitaria
+o de aceptación. El resultado de la ejecución debe conservarse como evidencia
+asociada a la especificación. Una funcionalidad no está terminada hasta que las
+pruebas pertinentes pasan y su evidencia queda disponible para revisión.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+### VII. UX clara y accesible
+Los flujos deben ser claros y consistentes, e informar los resultados con
+mensajes comprensibles de confirmación y error. La interfaz debe usar etiquetas
+accesibles, contraste legible y permitir la navegación e interacción mediante
+teclado. La validación de UX debe cubrir los flujos de la especificación.
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+### VIII. Uso responsable de IA
+Todo código generado o modificado con asistencia de IA debe ser revisado y
+validado por una persona del equipo antes de integrarse. Se conservan las
+especificaciones usadas, las interacciones relevantes con IA, las decisiones
+tomadas y las modificaciones realizadas, de modo que el equipo pueda auditar y
+explicar el resultado.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+### IX. Documentación bilingüe
+La documentación y las especificaciones del proyecto se mantienen en español e
+inglés. Las dos versiones deben conservar el mismo significado, identificadores,
+reglas de negocio y criterios de aceptación; los cambios en una versión deben
+reflejarse en la otra antes de aprobar la especificación.
+
+### X. Flujo de Git trazable
+Se utilizan ramas cortas por especificación o tarea. Cada commit relacionado
+con una funcionalidad referencia su identificador `SPEC-XX`. El código solo se
+integra en `main` cuando funciona y cumple sus pruebas y criterios de aceptación.
+La revisión de integración debe confirmar la trazabilidad y la evidencia de
+prueba asociadas.
+
+## Restricciones técnicas y de alcance
+
+El proyecto es un sistema de administración de turnos desarrollado como
+proyecto final de Análisis de Sistemas II por un equipo de cuatro integrantes.
+Las tecnologías y capas establecidas en estos principios son las restricciones
+arquitectónicas del proyecto. Toda ampliación técnica o funcional debe seguir
+el flujo de especificación y aprobación; la constitución no autoriza por sí
+misma funcionalidades nuevas.
+
+## Flujo de desarrollo y calidad
+
+El equipo aplica el orden definido en el principio de desarrollo guiado por
+especificaciones a cada funcionalidad. Antes de implementar, verifica que la
+especificación esté aprobada, identificada y tenga criterios Dado/Cuando/Entonces.
+Antes de integrar, verifica pruebas, evidencia, revisión humana del código
+asistido por IA cuando corresponda, documentación bilingüe y referencia
+`SPEC-XX` en tareas y commits. La revisión de la entrega debe registrar los
+incumplimientos y resolverlos antes de integrar a `main`.
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+Esta constitución rige el alcance y la forma de trabajo del equipo del proyecto.
+Las enmiendas deben proponerse y aprobarse por el equipo antes de aplicarse;
+deben actualizar este documento, registrar la razón del cambio e incrementar
+la versión. Cada revisión de especificación y cada revisión previa a integrar
+código debe verificar el cumplimiento de los principios aplicables. Las
+excepciones requieren una enmienda aprobada y documentada antes de realizar el
+trabajo afectado.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+La versión usa SemVer (`MAJOR.MINOR.PATCH`): MAJOR para cambios incompatibles
+en principios o gobernanza, MINOR para nuevos principios o ampliaciones
+materiales, y PATCH para aclaraciones sin cambio semántico. La fecha de última
+enmienda se actualiza con cada modificación aprobada. La ratificación inicial
+debe reflejar la fecha real de aprobación; no debe inferirse.
+
+**Version**: 1.0.0 | **Ratified**: fecha de aprobacion inicial 09/10/26
