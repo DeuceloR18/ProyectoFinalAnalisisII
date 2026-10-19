@@ -1,0 +1,66 @@
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sistema de Turnos</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <header>
+        <h1>Sistema de Administración de Turnos</h1>
+        <p>Control de atención al cliente</p>
+    </header>
+
+    <main>
+        <section>
+            <h2>Registrar servicio</h2>
+
+            <form id="formServicio">
+                <input type="text" id="nombreServicio"
+                    placeholder="Nombre del servicio" required>
+
+                <input type="text" id="prefijoServicio"
+                    placeholder="Prefijo (Ejemplo: C)" required>
+
+                <button type="submit">Registrar servicio</button>
+            </form>
+        </section>
+
+        <section>
+            <h2>Generar turno</h2>
+
+            <select id="servicio">
+                <option value="">Seleccione un servicio</option>
+            </select>
+
+            <input type="text" id="nombreCliente"
+                placeholder="Nombre del cliente (opcional)">
+
+            <button id="btnGenerar">Generar turno</button>
+        </section>
+
+        <section>
+            <h2>Atención de turnos</h2>
+
+            <h3>Turno actual</h3>
+            <p id="turnoActual">Ninguno</p>
+
+            <button id="btnSiguiente">Llamar siguiente</button>
+            <button id="btnFinalizar">Finalizar atención</button>
+        </section>
+
+        <section>
+            <h2>Fila de espera</h2>
+            <p id="cantidadEspera">Personas en espera: 0</p>
+            <ul id="listaTurnos"></ul>
+        </section>
+
+        <p id="mensaje" role="status" aria-live="polite"></p>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
