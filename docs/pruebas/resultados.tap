@@ -1,0 +1,94 @@
+TAP version 13
+# Subtest: SPEC-01: estado vacío, registro, mayúsculas, duplicado y espacios
+ok 1 - SPEC-01: estado vacío, registro, mayúsculas, duplicado y espacios
+  ---
+  duration_ms: 2030.6573
+  type: 'test'
+  ...
+# Subtest: SPEC-02/03: selección obligatoria, nombre opcional, número y orden de fila
+ok 2 - SPEC-02/03: selección obligatoria, nombre opcional, número y orden de fila
+  ---
+  duration_ms: 1358.9122
+  type: 'test'
+  ...
+# Subtest: SPEC-03/04/05: llamar primero, bloquear segunda llamada, finalizar y no llamar automáticamente
+ok 3 - SPEC-03/04/05: llamar primero, bloquear segunda llamada, finalizar y no llamar automáticamente
+  ---
+  duration_ms: 1173.5078
+  type: 'test'
+  ...
+# Subtest: SPEC-06: conservar, Escape, confirmar y renumerar posiciones
+ok 4 - SPEC-06: conservar, Escape, confirmar y renumerar posiciones
+  ---
+  duration_ms: 1159.9268
+  type: 'test'
+  ...
+# Subtest: SPEC-06: conflicto de estado mientras la confirmación está abierta
+ok 5 - SPEC-06: conflicto de estado mientras la confirmación está abierta
+  ---
+  duration_ms: 775.3911
+  type: 'test'
+  ...
+# Subtest: SPEC-03: cambio de servicio, consulta repetida y exclusión provista por API
+ok 6 - SPEC-03: cambio de servicio, consulta repetida y exclusión provista por API
+  ---
+  duration_ms: 884.3432
+  type: 'test'
+  ...
+# Subtest: Conexión: error visible, datos obsoletos eliminados y recuperación
+ok 7 - Conexión: error visible, datos obsoletos eliminados y recuperación
+  ---
+  duration_ms: 763.1577
+  type: 'test'
+  ...
+# Subtest: Seguridad: los nombres se muestran como texto sin ejecutar HTML
+ok 8 - Seguridad: los nombres se muestran como texto sin ejecutar HTML
+  ---
+  duration_ms: 675.1598
+  type: 'test'
+  ...
+# Subtest: Accesibilidad: etiquetas, teclado, foco de confirmación y móvil sin desbordamiento
+ok 9 - Accesibilidad: etiquetas, teclado, foco de confirmación y móvil sin desbordamiento
+  ---
+  duration_ms: 872.9564
+  type: 'test'
+  ...
+# Subtest: SPEC-01/02/04: recarga vuelve a consultar datos del servidor
+ok 10 - SPEC-01/02/04: recarga vuelve a consultar datos del servidor
+  ---
+  duration_ms: 805.9991
+  type: 'test'
+  ...
+# Subtest: Errores de transporte y JSON inválido se informan sin crear turnos
+ok 11 - Errores de transporte y JSON inválido se informan sin crear turnos
+  ---
+  duration_ms: 724.9208
+  type: 'test'
+  ...
+# Subtest: Una solicitud en curso bloquea acciones repetidas hasta finalizar
+ok 12 - Una solicitud en curso bloquea acciones repetidas hasta finalizar
+  ---
+  duration_ms: 1145.2166
+  type: 'test'
+  ...
+# Subtest: SPEC-04: fila vacía y atención de otro día se comunican correctamente
+ok 13 - SPEC-04: fila vacía y atención de otro día se comunican correctamente
+  ---
+  duration_ms: 762.8326
+  type: 'test'
+  ...
+# Subtest: Servidor de vista previa comunica que el backend está pendiente
+ok 14 - Servidor de vista previa comunica que el backend está pendiente
+  ---
+  duration_ms: 403.8456
+  type: 'test'
+  ...
+1..14
+# tests 14
+# suites 0
+# pass 14
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 14595.7292

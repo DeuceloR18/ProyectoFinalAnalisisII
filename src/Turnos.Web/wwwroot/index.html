@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="es">
+<head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Turnos | Recepción</title><link rel="stylesheet" href="styles.css"><script type="module" src="app.js"></script></head>
+<body>
+<a class="skip" href="#main">Ir al contenido</a>
+<header><div class="brand"><span class="brand-icon" aria-hidden="true">T</span><span>Turnos<small>Administración de atención</small></span></div><span class="role">Recepción</span></header>
+<main id="main">
+<div class="heading"><div><p class="eyebrow">PANEL DE RECEPCIÓN</p><h1>Cada turno, en orden.</h1><p>Gestiona los servicios y acompaña cada atención.</p></div><p id="date"></p></div>
+<div id="notice" role="status" aria-live="polite" tabindex="-1" hidden></div>
+<div class="layout">
+<aside><section class="card"><h2>Servicios de atención</h2><p>Registra un servicio para comenzar.</p><form id="service-form"><label for="name">Nombre del servicio</label><input id="name" name="nombre" required autocomplete="off"><label for="prefix">Prefijo</label><input id="prefix" name="prefijo" required autocomplete="off"><button type="submit">Registrar servicio</button></form><h3>Servicios registrados</h3><ul id="services"></ul></section></aside>
+<div class="workspace"><section class="card selector"><div><label for="service">Servicio de trabajo</label><select id="service"><option value="">Selecciona un servicio</option></select></div><button id="refresh" class="secondary">Actualizar fila</button></section>
+<div class="pair"><section class="card"><p class="eyebrow">NUEVO TURNO</p><h2>Recibir a un cliente</h2><form id="ticket-form"><label for="client">Nombre del cliente <span class="optional">(opcional)</span></label><input id="client" autocomplete="off"><button type="submit">Generar turno</button></form><div id="issued" class="issued" hidden><span>Turno generado</span><strong id="issued-number"></strong><span id="issued-detail"></span></div></section>
+<section class="card current-card"><p class="eyebrow">EN ATENCIÓN</p><h2>Turno actual</h2><strong id="current">Ninguno</strong><p id="current-client"></p><div class="actions"><button id="call">Llamar siguiente</button><button id="finish" class="secondary">Finalizar atención</button></div></section></div>
+<section class="card queue-card"><div class="queue-title"><div><h2>Fila de espera</h2><p>Turnos de hoy, en orden de llegada.</p></div><span class="count"><strong id="total">0</strong> en espera</span></div><p id="queue-empty">Selecciona un servicio para consultar su fila.</p><div class="table-wrap"><table id="queue-table" hidden><caption class="sr-only">Turnos en espera del servicio seleccionado</caption><thead><tr><th>Posición</th><th>Turno</th><th>Cliente</th><th>Acción</th></tr></thead><tbody id="queue"></tbody></table></div></section>
+</div></div><footer>Administración de turnos · Atención organizada, paso a paso.</footer>
+</main>
+<dialog id="cancel-dialog" aria-labelledby="cancel-title" aria-describedby="cancel-description"><h2 id="cancel-title">Cancelar turno</h2><p id="cancel-description"></p><p>El turno dejará de aparecer en la fila de espera.</p><div class="actions"><button id="keep" class="secondary">Conservar turno</button><button id="confirm-cancel" class="danger">Confirmar cancelación</button></div></dialog>
+</body></html>
