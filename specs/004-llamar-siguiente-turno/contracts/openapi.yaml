@@ -1,0 +1,191 @@
+openapi: 3.1.0
+info:
+  title: API para llamar siguiente turno y consultar turno actual
+  version: 1.0.0
+  description: Contrato de SPEC-04. Los endpoints operan por servicio y no permiten elegir manualmente un turno para llamar.
+servers:
+  - url: /
+paths:
+  /api/servicios/{servicioId}/turnos/llamar-siguiente:
+    post:
+      operationId: llamarSiguienteTurno
+      summary: Llamar al siguiente turno elegible del servicio
+      description: |
+        Llama automáticamente al turno más antiguo en Esperando del servicio
+        durante el día local actual del servidor. Si hay cualquier turno del
+        servicio en En atención, incluyendo días anteriores, no realiza otro
+        llamado. La transición registra FechaHoraLlamado.
+      parameters:
+        - $ref: "#/components/parameters/ServicioId"
+      responses:
+        "200":
+          description: El turno fue llamado y la transición quedó persistida.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TurnoLlamado"
+              example:
+                servicioId: 1
+                turnoId: 42
+                numeroTurno: C-001
+                estado: En atención
+                fechaHoraLlamado: "2026-10-20T10:15:30-06:00"
+        "404":
+          $ref: "#/components/responses/ServicioNoEncontrado"
+        "409":
+          description: No es posible efectuar un llamado en el estado actual del servicio.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/DetalleProblema"
+              examples:
+                sinTurnosEnEspera:
+                  value:
+                    type: about:blank
+                    title: No hay turnos en espera
+                    status: 409
+                    detail: No hay turnos en espera para este servicio.
+                    codigo: sin_turnos_en_espera
+                turnoEnAtencion:
+                  value:
+                    type: about:blank
+                    title: Atención en curso
+                    status: 409
+                    detail: Debe finalizarse la atención actual antes de llamar a otro turno.
+                    codigo: turno_en_atencion
+  /api/servicios/{servicioId}/turno-actual:
+    get:
+      operationId: consultarTurnoActual
+      summary: Consultar el turno actualmente en atención
+      description: Devuelve el turno En atención del servicio sin filtrar por fecha. Si no existe, turnoActual es null y la interfaz muestra Ninguno.
+      parameters:
+        - $ref: "#/components/parameters/ServicioId"
+      responses:
+        "200":
+          description: Turno actual si existe; null si el servicio no tiene ninguno.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TurnoActualResponse"
+              examples:
+                existe:
+                  value:
+                    servicioId: 1
+                    turnoActual:
+                      turnoId: 42
+                      numeroTurno: C-001
+                      estado: En atención
+                      fechaHoraLlamado: "2026-10-20T10:15:30-06:00"
+                ninguno:
+                  value:
+                    servicioId: 1
+                    turnoActual: null
+        "404":
+          $ref: "#/components/responses/ServicioNoEncontrado"
+components:
+  parameters:
+    ServicioId:
+      name: servicioId
+      in: path
+      required: true
+      description: Identificador del servicio registrado según SPEC-01.
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+  schemas:
+    TurnoLlamado:
+      type: object
+      required:
+        - servicioId
+        - turnoId
+        - numeroTurno
+        - estado
+        - fechaHoraLlamado
+      properties:
+        servicioId:
+          type: integer
+          format: int32
+        turnoId:
+          type: integer
+          format: int64
+        numeroTurno:
+          type: string
+        estado:
+          type: string
+          enum:
+            - En atención
+        fechaHoraLlamado:
+          type: string
+          format: date-time
+    TurnoActualResponse:
+      type: object
+      required:
+        - servicioId
+        - turnoActual
+      properties:
+        servicioId:
+          type: integer
+          format: int32
+        turnoActual:
+          oneOf:
+            - $ref: "#/components/schemas/TurnoActual"
+            - type: "null"
+    TurnoActual:
+      type: object
+      required:
+        - turnoId
+        - numeroTurno
+        - estado
+        - fechaHoraLlamado
+      properties:
+        turnoId:
+          type: integer
+          format: int64
+        numeroTurno:
+          type: string
+        estado:
+          type: string
+          enum:
+            - En atención
+        fechaHoraLlamado:
+          type: string
+          format: date-time
+    DetalleProblema:
+      type: object
+      required:
+        - type
+        - title
+        - status
+        - detail
+        - codigo
+      properties:
+        type:
+          type: string
+          format: uri-reference
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+          description: Mensaje claro en español.
+        codigo:
+          type: string
+          enum:
+            - servicio_no_encontrado
+            - sin_turnos_en_espera
+            - turno_en_atencion
+  responses:
+    ServicioNoEncontrado:
+      description: El servicio solicitado no existe.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/DetalleProblema"
+          example:
+            type: about:blank
+            title: Servicio no encontrado
+            status: 404
+            detail: Selecciona un servicio registrado para continuar.
+            codigo: servicio_no_encontrado
