@@ -1,0 +1,191 @@
+openapi: 3.1.0
+info:
+  title: API para finalizar atención
+  version: 1.0.0
+  description: Contrato de SPEC-05. Finaliza únicamente el turno que está en atención para el servicio indicado.
+servers:
+  - url: /
+paths:
+  /api/servicios/{servicioId}/turnos/finalizar-atencion:
+    post:
+      operationId: finalizarAtencion
+      summary: Finalizar el turno en atención del servicio
+      description: |
+        Finaliza el único turno en atención del servicio indicado. El cliente
+        no envía el identificador del turno ni la fecha de finalización. El
+        servidor persiste el estado Finalizado y su marca temporal en una sola
+        operación. No llama automáticamente al siguiente turno.
+      parameters:
+        - $ref: "#/components/parameters/ServicioId"
+      responses:
+        "200":
+          description: La finalización fue confirmada y el registro sigue persistido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TurnoFinalizado"
+              example:
+                servicioId: 1
+                turnoId: 42
+                numeroTurno: C-001
+                nombreCliente: Ana Pérez
+                estado: Finalizado
+                fechaHoraGeneracion: "2026-10-20T10:00:00-06:00"
+                fechaHoraLlamado: "2026-10-20T10:15:00-06:00"
+                fechaHoraFinalizacion: "2026-10-20T10:25:00-06:00"
+        "404":
+          $ref: "#/components/responses/ServicioNoEncontrado"
+        "409":
+          $ref: "#/components/responses/SinTurnoEnAtencion"
+  /api/servicios/{servicioId}/turno-actual:
+    get:
+      operationId: consultarTurnoActualTrasFinalizar
+      summary: Consultar el turno actual tras la finalización
+      description: |
+        Ruta existente de SPEC-04, sin cambios en su contrato. Después de
+        finalizar, un servicio sin otro turno en atención responde con
+        turnoActual null; la interfaz muestra Ninguno.
+      parameters:
+        - $ref: "#/components/parameters/ServicioId"
+      responses:
+        "200":
+          description: Estado actual del servicio; null cuando no hay turno en atención.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TurnoActualResponse"
+              example:
+                servicioId: 1
+                turnoActual: null
+        "404":
+          $ref: "#/components/responses/ServicioNoEncontrado"
+components:
+  parameters:
+    ServicioId:
+      name: servicioId
+      in: path
+      required: true
+      description: Identificador del servicio registrado.
+      schema:
+        type: integer
+        format: int32
+        minimum: 1
+  schemas:
+    TurnoFinalizado:
+      type: object
+      required:
+        - servicioId
+        - turnoId
+        - numeroTurno
+        - estado
+        - fechaHoraGeneracion
+        - fechaHoraLlamado
+        - fechaHoraFinalizacion
+      properties:
+        servicioId:
+          type: integer
+          format: int32
+        turnoId:
+          type: integer
+          format: int64
+        numeroTurno:
+          type: string
+        nombreCliente:
+          oneOf:
+            - type: string
+            - type: "null"
+        estado:
+          type: string
+          enum:
+            - Finalizado
+        fechaHoraGeneracion:
+          type: string
+          format: date-time
+        fechaHoraLlamado:
+          type: string
+          format: date-time
+        fechaHoraFinalizacion:
+          type: string
+          format: date-time
+    TurnoActualResponse:
+      type: object
+      required:
+        - servicioId
+        - turnoActual
+      properties:
+        servicioId:
+          type: integer
+          format: int32
+        turnoActual:
+          oneOf:
+            - $ref: "#/components/schemas/TurnoActual"
+            - type: "null"
+    TurnoActual:
+      type: object
+      required:
+        - turnoId
+        - numeroTurno
+        - estado
+        - fechaHoraLlamado
+      properties:
+        turnoId:
+          type: integer
+          format: int64
+        numeroTurno:
+          type: string
+        estado:
+          type: string
+          enum:
+            - En atención
+        fechaHoraLlamado:
+          type: string
+          format: date-time
+    DetalleProblema:
+      type: object
+      required:
+        - type
+        - title
+        - status
+        - detail
+        - codigo
+      properties:
+        type:
+          type: string
+          format: uri-reference
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+          description: Mensaje comprensible en español.
+        codigo:
+          type: string
+          enum:
+            - servicio_no_encontrado
+            - sin_turno_en_atencion
+  responses:
+    ServicioNoEncontrado:
+      description: El servicio indicado no existe.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/DetalleProblema"
+          example:
+            type: about:blank
+            title: Servicio no encontrado
+            status: 404
+            detail: Selecciona un servicio registrado para continuar.
+            codigo: servicio_no_encontrado
+    SinTurnoEnAtencion:
+      description: El servicio no tiene un turno en atención que se pueda finalizar.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/DetalleProblema"
+          example:
+            type: about:blank
+            title: No hay turno en atención
+            status: 409
+            detail: No hay un turno en atención para este servicio.
+            codigo: sin_turno_en_atencion
