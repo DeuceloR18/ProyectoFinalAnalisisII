@@ -1,0 +1,144 @@
+openapi: 3.1.0
+info:
+  title: API para cancelar turnos
+  version: 1.0.0
+  description: Contrato de SPEC-06. La interfaz pide confirmación antes de invocar la cancelación.
+servers:
+  - url: /
+paths:
+  /api/turnos/{turnoId}/cancelar:
+    post:
+      operationId: cancelarTurno
+      summary: Cancelar un turno que sigue en espera
+      description: |
+        La solicitud representa una decisión ya confirmada en la interfaz.
+        No se envía un indicador de confirmación en el cuerpo. Solo se permite
+        cancelar un turno que aún esté en Esperando; el registro se conserva.
+      parameters:
+        - $ref: "#/components/parameters/TurnoId"
+      responses:
+        "200":
+          description: Turno cancelado y marca temporal persistida.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/TurnoCancelado"
+              example:
+                turnoId: 42
+                servicioId: 1
+                numeroTurno: C-003
+                nombreCliente: Ana Pérez
+                estado: Cancelado
+                fechaHoraGeneracion: "2026-10-20T10:00:00-06:00"
+                fechaHoraLlamado: null
+                fechaHoraCancelacion: "2026-10-20T10:12:00-06:00"
+        "404":
+          $ref: "#/components/responses/TurnoNoEncontrado"
+        "409":
+          description: El turno existe pero su estado actual no permite cancelarlo.
+          content:
+            application/problem+json:
+              schema:
+                $ref: "#/components/schemas/DetalleProblema"
+              examples:
+                turnoYaCancelado:
+                  value:
+                    type: about:blank
+                    title: Turno ya cancelado
+                    status: 409
+                    detail: El turno C-003 ya está cancelado.
+                    codigo: turno_ya_cancelado
+                turnoNoEsperando:
+                  value:
+                    type: about:blank
+                    title: Turno no cancelable
+                    status: 409
+                    detail: El turno C-003 ya no está en espera y no se puede cancelar.
+                    codigo: turno_no_esperando
+components:
+  parameters:
+    TurnoId:
+      name: turnoId
+      in: path
+      required: true
+      description: Identificador del turno que se mostró en la confirmación.
+      schema:
+        type: integer
+        format: int64
+        minimum: 1
+  schemas:
+    TurnoCancelado:
+      type: object
+      required:
+        - turnoId
+        - servicioId
+        - numeroTurno
+        - estado
+        - fechaHoraGeneracion
+        - fechaHoraCancelacion
+      properties:
+        turnoId:
+          type: integer
+          format: int64
+        servicioId:
+          type: integer
+          format: int32
+        numeroTurno:
+          type: string
+        nombreCliente:
+          oneOf:
+            - type: string
+            - type: "null"
+        estado:
+          type: string
+          enum:
+            - Cancelado
+        fechaHoraGeneracion:
+          type: string
+          format: date-time
+        fechaHoraLlamado:
+          oneOf:
+            - type: string
+              format: date-time
+            - type: "null"
+        fechaHoraCancelacion:
+          type: string
+          format: date-time
+    DetalleProblema:
+      type: object
+      required:
+        - type
+        - title
+        - status
+        - detail
+        - codigo
+      properties:
+        type:
+          type: string
+          format: uri-reference
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+          description: Mensaje claro en español e identificable por la interfaz.
+        codigo:
+          type: string
+          enum:
+            - turno_no_encontrado
+            - turno_ya_cancelado
+            - turno_no_esperando
+  responses:
+    TurnoNoEncontrado:
+      description: No existe un turno con el identificador solicitado.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/DetalleProblema"
+          example:
+            type: about:blank
+            title: Turno no encontrado
+            status: 404
+            detail: El turno solicitado ya no existe o no es accesible.
+            codigo: turno_no_encontrado
