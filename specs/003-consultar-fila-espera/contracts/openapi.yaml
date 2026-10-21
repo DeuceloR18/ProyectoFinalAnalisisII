@@ -1,0 +1,123 @@
+openapi: 3.1.0
+info:
+  title: API de consulta de fila de espera
+  version: 1.0.0
+  description: Contrato específico para consultar en modo de solo lectura la fila actual de un servicio en SPEC-03.
+servers:
+  - url: /
+paths:
+  /api/servicios/{servicioId}/fila-espera:
+    get:
+      operationId: consultarFilaEspera
+      summary: Consultar la fila actual de un servicio
+      description: |
+        Devuelve solo los turnos del servicio en estado Esperando y con
+        FechaTurno igual al día local actual del servidor. Ordena por fecha y
+        hora de generación ascendente, con el correlativo numérico ascendente
+        como desempate. Posiciones y total se calculan en cada consulta. No
+        modifica datos.
+      parameters:
+        - name: servicioId
+          in: path
+          required: true
+          description: Identificador del servicio registrado según SPEC-01.
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+      responses:
+        "200":
+          description: Fila actual del servicio; la colección puede estar vacía.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/FilaEspera"
+              examples:
+                conTurnos:
+                  value:
+                    totalEnEspera: 2
+                    elementos:
+                      - posicion: 1
+                        numeroTurno: C-001
+                        nombreCliente: Ana Pérez
+                      - posicion: 2
+                        numeroTurno: C-002
+                        nombreCliente: null
+                sinTurnos:
+                  value:
+                    totalEnEspera: 0
+                    elementos: []
+        "404":
+          $ref: "#/components/responses/ServicioNoEncontrado"
+components:
+  schemas:
+    FilaEspera:
+      type: object
+      required:
+        - totalEnEspera
+        - elementos
+      properties:
+        totalEnEspera:
+          type: integer
+          format: int64
+          minimum: 0
+          description: Número de turnos devueltos en la colección.
+        elementos:
+          type: array
+          items:
+            $ref: "#/components/schemas/ElementoFila"
+    ElementoFila:
+      type: object
+      required:
+        - posicion
+        - numeroTurno
+      properties:
+        posicion:
+          type: integer
+          format: int64
+          minimum: 1
+          description: Posición calculada al consultar; no se persiste.
+        numeroTurno:
+          type: string
+          description: Número de turno persistido según SPEC-02.
+        nombreCliente:
+          type:
+            - string
+            - "null"
+          description: Nombre del cliente si fue informado; en otro caso es null.
+    DetalleProblema:
+      type: object
+      required:
+        - type
+        - title
+        - status
+        - detail
+      properties:
+        type:
+          type: string
+          format: uri-reference
+        title:
+          type: string
+        status:
+          type: integer
+        detail:
+          type: string
+          description: Mensaje claro en español.
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+  responses:
+    ServicioNoEncontrado:
+      description: No existe el servicio indicado.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/DetalleProblema"
+          example:
+            type: about:blank
+            title: Servicio no encontrado
+            status: 404
+            detail: El servicio solicitado no existe.
