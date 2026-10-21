@@ -1,0 +1,182 @@
+
+/* Estilos generales */
+* {
+    box-sizing: border-box;
+}
+
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f1f5f9;
+    margin: 0;
+    color: #1e293b;
+}
+
+/* Encabezado */
+header {
+    background-color: #1e3a8a;
+    color: white;
+    text-align: center;
+    padding: 30px 15px;
+}
+
+header h1 {
+    margin: 0 0 10px;
+    font-size: 28px;
+}
+
+header p {
+    margin: 0;
+}
+
+/* Contenido principal */
+main {
+    max-width: 950px;
+    margin: 30px auto;
+    padding: 0 20px;
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 20px;
+}
+
+/* Tarjetas */
+section {
+    background: white;
+    padding: 25px;
+    border-radius: 12px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+}
+
+h2 {
+    color: #1e3a8a;
+    font-size: 20px;
+    margin-top: 0;
+}
+
+/* Formularios */
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+input,
+select {
+    width: 100%;
+    padding: 12px;
+    margin-bottom: 12px;
+    border: 1px solid #cbd5e1;
+    border-radius: 7px;
+    font-size: 15px;
+}
+
+/* Botones generales */
+button {
+    background-color: #2563eb;
+    color: white;
+    border: none;
+    padding: 12px 18px;
+    border-radius: 7px;
+    cursor: pointer;
+    font-size: 15px;
+    margin: 5px 5px 5px 0;
+}
+
+button:hover {
+    background-color: #1d4ed8;
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible {
+    outline: 3px solid #93c5fd;
+    outline-offset: 2px;
+}
+
+/* Botón finalizar atención */
+#btnFinalizar {
+    background-color: #16a34a;
+}
+
+#btnFinalizar:hover {
+    background-color: #15803d;
+}
+
+/* Turno actual */
+#turnoActual {
+    font-size: 40px;
+    font-weight: bold;
+    color: #2563eb;
+    text-align: center;
+    padding: 15px;
+    background-color: #eff6ff;
+    border-radius: 10px;
+}
+
+/* Lista de turnos */
+#listaTurnos {
+    list-style: none;
+    padding-left: 0;
+    margin-top: 15px;
+}
+
+#listaTurnos li {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 10px;
+    padding: 12px;
+    border-bottom: 1px solid #e2e8f0;
+}
+
+#listaTurnos li span {
+    overflow-wrap: anywhere;
+}
+
+/* Botón cancelar turno */
+.btnCancelar {
+    background-color: #dc2626;
+    color: white;
+    padding: 8px 14px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 13px;
+    margin-left: 12px;
+    flex-shrink: 0;
+}
+
+.btnCancelar:hover {
+    background-color: #b91c1c;
+}
+
+/* Mensajes del sistema */
+#mensaje {
+    grid-column: 1 / -1;
+    text-align: center;
+    font-weight: bold;
+    padding: 10px;
+}
+
+/* Diseño para celulares */
+@media (max-width: 700px) {
+    main {
+        grid-template-columns: 1fr;
+    }
+
+    header h1 {
+        font-size: 23px;
+    }
+
+    section {
+        padding: 20px;
+    }
+
+    #turnoActual {
+        font-size: 32px;
+    }
+
+    .btnCancelar {
+        padding: 8px 10px;
+        font-size: 12px;
+    }
+}
