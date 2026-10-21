@@ -38,6 +38,7 @@ El recepcionista genera turnos para los servicios disponibles y recibe números 
 2. **Dado** que se generan turnos para dos servicios con prefijos distintos, **Cuando** se crea el primer turno de cada servicio en el día, **Entonces** cada servicio inicia su propia secuencia en «001» y utiliza su propio prefijo.
 3. **Dado** que un servicio tuvo turnos el día anterior, **Cuando** el recepcionista genera su primer turno después del cambio de día, **Entonces** el correlativo vuelve a «001».
 4. **Dado** que se generaron varios turnos, **Cuando** se comparan sus fechas y horas de generación, **Entonces** cada turno tiene registrada su fecha y hora para identificar su orden de llegada.
+5. **Dado** que un servicio ya tiene el turno «C-999» en el día, **Cuando** el recepcionista genera el siguiente turno para «C», **Entonces** recibe el número «C-1000».
 
 ### Historia de usuario 3 - Asociar opcionalmente el nombre del cliente y conservar el turno (Prioridad: P1)
 
@@ -52,15 +53,18 @@ El recepcionista puede asociar el nombre del cliente al turno cuando lo conoce, 
 1. **Dado** que el recepcionista escribe el nombre de un cliente, **Cuando** genera el turno, **Entonces** el nombre queda asociado al turno generado.
 2. **Dado** que el nombre del cliente se deja vacío, **Cuando** el recepcionista genera el turno para un servicio válido, **Entonces** el turno se genera igualmente y el nombre queda sin informar.
 3. **Dado** que se generaron turnos y se cerró la aplicación, **Cuando** el recepcionista vuelve a abrirla, **Entonces** los turnos continúan conservados con su número, servicio, estado, fecha y hora y, cuando se informó, el nombre del cliente.
+4. **Dado** que el nombre del cliente supera los 100 caracteres, **Cuando** el recepcionista intenta generar el turno, **Entonces** la operación se rechaza con un mensaje claro y no se crea ningún turno.
 
 ### Casos límite
 
 - Si la lista de servicios está vacía, el sistema debe explicar que primero hay que registrar un servicio; no debe permitir crear un turno sin servicio.
 - Si la selección del servicio no corresponde a un servicio registrado, la generación debe rechazarse sin guardar un turno.
 - Un nombre de cliente vacío o compuesto solo por espacios se considera no informado; no impide la generación del turno.
+- Si se proporciona, el nombre del cliente no puede superar los 100 caracteres; si excede ese máximo, se rechaza la generación y no se crea el turno.
 - La secuencia diaria debe distinguir tanto el servicio como la fecha: un nuevo día reinicia cada servicio por separado, sin alterar ni eliminar turnos previos.
 - Si el correlativo alcanza 999 en el mismo día para un servicio, el siguiente número debe seguir siendo único y secuencial; se asume que el formato usa al menos tres dígitos y puede ampliarse a cuatro o más.
-- La fecha usada para determinar el día de reinicio corresponde al día calendario local de la aplicación en el momento de generación.
+- El correlativo admite hasta 38 dígitos; el número se muestra con un mínimo de tres dígitos y no se limita a ese ancho.
+- La fecha usada para determinar el día de reinicio corresponde al día calendario local del servidor en el momento de generación.
 - La persistencia tras reabrir debe conservar los turnos previos y evitar que el siguiente turno del mismo servicio y día repita un número.
 
 ## Requisitos
@@ -70,19 +74,20 @@ El recepcionista puede asociar el nombre del cliente al turno cuando lo conoce, 
 - **RF-001**: El sistema DEBE permitir al recepcionista seleccionar un servicio previamente registrado y generar para él un turno.
 - **RF-002**: El sistema DEBE rechazar la generación si no se seleccionó un servicio o si el servicio no existe, mostrar un mensaje claro y no guardar ningún turno.
 - **RF-003**: Si no hay servicios registrados, el sistema DEBE informar al recepcionista que primero debe registrar un servicio y no debe crear un turno.
-- **RF-004**: El sistema DEBE formar el número del turno con el prefijo del servicio y un correlativo numérico separado por un guion, por ejemplo, «C-001»; el correlativo se muestra con al menos tres dígitos.
+- **RF-004**: El sistema DEBE formar el número del turno con el prefijo del servicio y un correlativo numérico de hasta 38 dígitos separado por un guion, por ejemplo, «C-001»; el correlativo se muestra con al menos tres dígitos y puede crecer más allá de ese ancho.
 - **RF-005**: El sistema DEBE mantener una secuencia correlativa independiente para cada servicio y fecha; el primer turno del día para cada servicio recibe el correlativo «001», y cada turno posterior incrementa en uno.
-- **RF-006**: El sistema DEBE determinar el día de la secuencia usando el día calendario local en que se genera el turno. Los turnos de días anteriores se conservan y no afectan el correlativo del día nuevo.
-- **RF-007**: Cada turno nuevo DEBE quedar en estado «Esperando» y registrar la fecha y hora de generación.
+- **RF-006**: El sistema DEBE determinar el día de la secuencia usando el día calendario local del servidor en que se genera el turno. Los turnos de días anteriores se conservan y no afectan el correlativo del día nuevo.
+- **RF-007**: Cada turno nuevo DEBE quedar en estado «Esperando» y registrar la fecha y hora de generación, que definen su orden de llegada.
 - **RF-008**: El sistema DEBE permitir que el recepcionista indique opcionalmente el nombre del cliente y asociarlo al turno cuando se proporciona. La omisión del nombre no debe impedir la generación.
 - **RF-009**: Tras generar un turno correctamente, el sistema DEBE mostrar al recepcionista el número asignado y confirmar la operación con un mensaje.
 - **RF-010**: El sistema DEBE conservar los turnos y sus datos al cerrar y volver a abrir la aplicación, de modo que la numeración pueda continuar sin repetir números dentro del mismo servicio y día.
 - **RF-011**: Esta funcionalidad se limita a generar turnos. Llamar, finalizar o cancelar turnos, imprimir tickets, ofrecer pantallas para el público y enviar notificaciones a clientes quedan fuera de alcance.
+- **RF-012**: Si se proporciona el nombre del cliente, el sistema DEBE rechazar la generación cuando el nombre supere los 100 caracteres, informar el motivo con un mensaje claro y no crear el turno.
 
 ### Entidades principales
 
 - **Servicio de atención**: Servicio registrado según SPEC-01, identificado por su nombre y prefijo único en mayúsculas. Cada turno pertenece a un servicio existente.
-- **Turno**: Registro de una solicitud de atención, asociado a un servicio; contiene el número formado por prefijo y correlativo diario, el estado, la fecha y hora de generación y, opcionalmente, el nombre del cliente.
+- **Turno**: Registro de una solicitud de atención, asociado a un servicio; contiene el número formado por prefijo y correlativo diario de hasta 38 dígitos, el estado, la fecha y hora de generación y, opcionalmente, un nombre de cliente de hasta 100 caracteres.
 - **Correlativo diario por servicio**: Posición numérica del turno dentro de la secuencia de un servicio en una fecha determinada. La secuencia es independiente para cada servicio y se reinicia al comenzar un nuevo día local.
 
 ## Criterios de éxito
@@ -99,7 +104,7 @@ El recepcionista puede asociar el nombre del cliente al turno cuando lo conoce, 
 
 - SPEC-01 está disponible y provee los servicios registrados con prefijos únicos normalizados en mayúsculas; esta funcionalidad no registra ni modifica servicios.
 - El nombre del cliente es opcional; si está vacío o solo contiene espacios, se conserva como no informado. Si se proporciona, se conserva sin exigir un formato adicional.
-- El día de reinicio de la secuencia es el día calendario local de la aplicación; la hora de generación corresponde al momento en que se confirma la creación del turno.
-- El correlativo usa tres dígitos como ancho mínimo, con ceros a la izquierda; si supera 999, continúa con todos los dígitos necesarios para mantener la secuencia única.
+- El día de reinicio de la secuencia es el día calendario local del servidor; la fecha y hora de generación se obtienen del reloj del servidor al asignar el turno.
+- El correlativo usa tres dígitos como ancho mínimo, con ceros a la izquierda; si supera 999, continúa con más dígitos hasta un máximo de 38.
 - El recepcionista es el único usuario del sistema; los clientes no interactúan con la aplicación.
 - Esta especificación no agrega consulta histórica de turnos ni operaciones posteriores sobre ellos; solo requiere que se conserven sus datos.

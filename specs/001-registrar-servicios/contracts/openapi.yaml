@@ -1,0 +1,153 @@
+openapi: 3.1.0
+info:
+  title: API de servicios de atención
+  version: 1.0.0
+  description: Contrato de consulta y registro de servicios para SPEC-01.
+servers:
+  - url: /
+paths:
+  /api/servicios:
+    get:
+      operationId: consultarServicios
+      summary: Consultar todos los servicios
+      description: Devuelve la colección en un orden determinista. Si no hay servicios, devuelve una colección vacía.
+      responses:
+        "200":
+          description: Colección consultada correctamente; puede estar vacía.
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: "#/components/schemas/Servicio"
+              examples:
+                vacia:
+                  summary: No hay servicios registrados
+                  value: []
+        "500":
+          $ref: "#/components/responses/ErrorServidor"
+    post:
+      operationId: registrarServicio
+      summary: Registrar un servicio
+      description: Recorta espacios periféricos, normaliza el prefijo a mayúsculas y persiste el servicio si es válido y el prefijo está disponible.
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NuevoServicio"
+            examples:
+              registro:
+                value:
+                  nombre: Consultas
+                  prefijo: c
+      responses:
+        "201":
+          description: Servicio creado y persistido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Servicio"
+        "400":
+          $ref: "#/components/responses/DatosInvalidos"
+        "409":
+          $ref: "#/components/responses/PrefijoEnUso"
+        "500":
+          $ref: "#/components/responses/ErrorServidor"
+components:
+  schemas:
+    NuevoServicio:
+      type: object
+      additionalProperties: false
+      required:
+        - nombre
+        - prefijo
+      properties:
+        nombre:
+          type: string
+          description: Nombre recortado del servicio; no puede quedar vacío ni superar 100 caracteres.
+          x-longitud-maxima-despues-de-recortar: 100
+        prefijo:
+          type: string
+          description: Prefijo recortado; se almacena en mayúsculas y no se repite ignorando mayúsculas.
+          x-longitud-maxima-despues-de-recortar: 5
+    Servicio:
+      type: object
+      required:
+        - servicioId
+        - nombre
+        - prefijo
+      properties:
+        servicioId:
+          type: integer
+          format: int32
+          readOnly: true
+        nombre:
+          type: string
+          maxLength: 100
+        prefijo:
+          type: string
+          maxLength: 5
+          description: Valor almacenado en mayúsculas.
+    DetalleProblema:
+      type: object
+      required:
+        - type
+        - title
+        - status
+        - detail
+      properties:
+        type:
+          type: string
+          format: uri-reference
+        title:
+          type: string
+          description: Resumen del error en español.
+        status:
+          type: integer
+        detail:
+          type: string
+          description: Explicación comprensible del error en español.
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          description: Mensajes de validación agrupados por campo.
+        codigo:
+          type: string
+          description: Código estable del error de negocio, cuando aplique.
+  responses:
+    DatosInvalidos:
+      description: Falta un dato, está vacío tras recortarlo o excede su longitud máxima.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/DetalleProblema"
+          example:
+            type: about:blank
+            title: Datos inválidos
+            status: 400
+            detail: El prefijo no puede superar los 5 caracteres.
+            errors:
+              prefijo:
+                - El prefijo no puede superar los 5 caracteres.
+    PrefijoEnUso:
+      description: Ya existe un servicio con el mismo prefijo sin distinguir mayúsculas.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/DetalleProblema"
+          example:
+            type: about:blank
+            title: Prefijo en uso
+            status: 409
+            detail: El prefijo ya está en uso.
+            codigo: prefijo_duplicado
+    ErrorServidor:
+      description: Ocurrió un error no atribuible a los datos enviados.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/DetalleProblema"
