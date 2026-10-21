@@ -1,0 +1,172 @@
+openapi: 3.1.0
+info:
+  title: API de generación de turnos
+  version: 1.0.0
+  description: Contrato específico para generar turnos en SPEC-02. Reutiliza la API de servicios descrita en SPEC-01.
+servers:
+  - url: /
+paths:
+  /api/servicios/{servicioId}/turnos:
+    post:
+      operationId: generarTurno
+      summary: Generar un turno para un servicio
+      description: |
+        Asigna de forma atómica el siguiente correlativo del servicio y del día
+        local del servidor. El correlativo se presenta con al menos tres
+        dígitos y puede crecer hasta 38. El turno inicia en estado Esperando.
+      parameters:
+        - name: servicioId
+          in: path
+          required: true
+          description: Identificador de un servicio registrado según SPEC-01.
+          schema:
+            type: integer
+            format: int32
+            minimum: 1
+      requestBody:
+        required: false
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/NuevoTurno"
+            examples:
+              conNombre:
+                value:
+                  nombreCliente: Ana Pérez
+              sinNombre:
+                value: {}
+      responses:
+        "201":
+          description: Turno creado y persistido.
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Turno"
+        "400":
+          $ref: "#/components/responses/DatosInvalidos"
+        "404":
+          $ref: "#/components/responses/ServicioNoEncontrado"
+        "409":
+          $ref: "#/components/responses/CorrelativoAgotado"
+        "500":
+          $ref: "#/components/responses/ErrorServidor"
+components:
+  schemas:
+    NuevoTurno:
+      type: object
+      additionalProperties: false
+      properties:
+        nombreCliente:
+          type:
+            - string
+            - "null"
+          description: Nombre opcional del cliente; vacío o solo espacios se considera no informado.
+          maxLength: 100
+    Turno:
+      type: object
+      required:
+        - turnoId
+        - servicioId
+        - numeroTurno
+        - estado
+        - fechaHoraGeneracion
+      properties:
+        turnoId:
+          type: integer
+          format: int64
+          readOnly: true
+        servicioId:
+          type: integer
+          format: int32
+        numeroTurno:
+          type: string
+          maxLength: 44
+          description: Prefijo del servicio, guion y correlativo de hasta 38 dígitos.
+          example: C-001
+        nombreCliente:
+          type:
+            - string
+            - "null"
+          maxLength: 100
+        estado:
+          type: string
+          enum:
+            - Esperando
+        fechaHoraGeneracion:
+          type: string
+          format: date-time
+          description: Fecha y hora local del servidor en que se confirmó la asignación.
+    DetalleProblema:
+      type: object
+      required:
+        - type
+        - title
+        - status
+        - detail
+      properties:
+        type:
+          type: string
+          format: uri-reference
+        title:
+          type: string
+          description: Resumen del error en español.
+        status:
+          type: integer
+        detail:
+          type: string
+          description: Mensaje claro en español.
+        errors:
+          type: object
+          additionalProperties:
+            type: array
+            items:
+              type: string
+          description: Errores organizados por campo.
+        codigo:
+          type: string
+          description: Código estable de error de negocio cuando aplique.
+  responses:
+    DatosInvalidos:
+      description: El nombre del cliente supera los 100 caracteres o el cuerpo de la solicitud es inválido.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/DetalleProblema"
+          example:
+            type: about:blank
+            title: Datos inválidos
+            status: 400
+            detail: El nombre del cliente no puede superar los 100 caracteres.
+            errors:
+              nombreCliente:
+                - El nombre del cliente no puede superar los 100 caracteres.
+    ServicioNoEncontrado:
+      description: No existe el servicio indicado; no se crea ningún turno.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/DetalleProblema"
+          example:
+            type: about:blank
+            title: Servicio no encontrado
+            status: 404
+            detail: Selecciona un servicio registrado para generar el turno.
+            codigo: servicio_no_encontrado
+    CorrelativoAgotado:
+      description: El correlativo diario del servicio alcanzó el máximo técnico de 38 dígitos; no se crea turno.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/DetalleProblema"
+          example:
+            type: about:blank
+            title: Correlativo agotado
+            status: 409
+            detail: No es posible generar otro turno para este servicio y día.
+            codigo: correlativo_agotado
+    ErrorServidor:
+      description: Ocurrió un error no atribuible a los datos enviados.
+      content:
+        application/problem+json:
+          schema:
+            $ref: "#/components/schemas/DetalleProblema"

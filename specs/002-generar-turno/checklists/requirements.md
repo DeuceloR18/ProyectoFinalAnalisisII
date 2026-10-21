@@ -31,5 +31,5 @@
 
 ## Notas
 
-- Revisión completada: los 16 criterios pasan. La dependencia de SPEC-01, la secuencia diaria por servicio, los datos persistidos y los límites de alcance están definidos.
+- Revisión completada: se verificaron los criterios de calidad, la dependencia de SPEC-01, la secuencia diaria por servicio (incluido el paso de 999 a 1000), los datos persistidos, el máximo de 38 dígitos del correlativo, el límite de 100 caracteres para el nombre del cliente y los límites de alcance.
 - La especificación y esta lista se redactan únicamente en español conforme a la instrucción expresa para SPEC-02.
