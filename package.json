@@ -1,0 +1,10 @@
+{
+  "name": "turnos-frontend",
+  "private": true,
+  "scripts": {
+    "start": "node tests/frontend/server.cjs",
+    "test": "node --test --test-concurrency=1 tests/frontend/acceptance.test.cjs"
+  },
+  "engines": { "node": ">=20" },
+  "devDependencies": { "playwright": "1.62.1" }
+}
