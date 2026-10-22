@@ -1,49 +1,183 @@
-# Aceptación de frontend / Frontend acceptance
+# Sistema de Administración de Turnos
 
-## Español
+Proyecto final de **Análisis de Sistemas II**, desarrollado con **Spec-Driven Development (SDD)** usando GitHub Spec Kit.
 
-Ejecutar desde la raíz con Node.js 20 o posterior y Microsoft Edge instalado:
+Aplicación web para que un recepcionista administre turnos de atención: registra servicios, genera turnos con número correlativo, consulta la fila de espera, llama al siguiente turno, finaliza la atención y cancela turnos en espera.
 
-```sh
-npm ci
-npm test
+## Integrantes
+
+| Persona | Responsabilidad principal |
+|---|---|
+| Persona 1 (DANILO UCELO ) | Requerimientos y SDD: análisis, especificaciones, trazabilidad |
+| Persona 2 (ARIATNA BERGANZA) | Backend: capas Domain y Application |
+| Persona 3 (JUAN LECHUGA) | Infrastructure, base de datos y API |
+| Persona 4 (KATHERINE) | Interfaz web, UX y diagramas C4 |
+| Persona 5 (JULIO SANDOVAL) | Documentacion completa|
+
+
+## Funcionalidades
+
+| Requerimiento | Especificación | Descripción |
+|---|---|---|
+| RF01 | SPEC-01 | Registrar y consultar servicios (nombre y prefijo) |
+| RF02 | SPEC-02 | Generar turno con número correlativo por servicio y por día |
+| RF03 | SPEC-03 | Consultar la fila de espera de un servicio |
+| RF04 | SPEC-04 | Llamar al siguiente turno |
+| RF05 | SPEC-05 | Finalizar la atención de un turno |
+| RF06 | SPEC-06 | Cancelar un turno en espera con confirmación (prioridad secundaria) |
+
+Reglas principales: el prefijo del servicio se guarda en mayúscula, es único y tiene un máximo de 5 caracteres; los nombres tienen un máximo de 100; el número de turno es prefijo, guion y correlativo (por ejemplo `C-001`); un servicio solo puede tener un turno **En atención** a la vez. Los estados de un turno son: Esperando, En atención, Finalizado y Cancelado.
+
+## Tecnologías
+
+- C# y .NET 10 (SDK 10.0.302)
+- ASP.NET Core (API REST) que también sirve la interfaz estática
+- SQL Server con Dapper
+- Interfaz en HTML, CSS y JavaScript (`wwwroot`)
+- GitHub Spec Kit con GitHub Copilot para el flujo SDD
+
+## Arquitectura
+
+Arquitectura en capas. La capa Domain no depende de ninguna otra.
+
+| Proyecto | Responsabilidad |
+|---|---|
+| `SistemaTurnos.Domain` | Entidades, estados y reglas de negocio |
+| `SistemaTurnos.Application` | Casos de uso, servicios e interfaces de repositorio |
+| `SistemaTurnos.Infrastructure` | Acceso a datos (SQL Server, Dapper) |
+| `SistemaTurnos.Web` | API REST e interfaz web |
+
+## Estructura del repositorio
+
+```
+.
+├── .github/skills/        Comandos de Spec Kit (no modificar)
+├── .specify/              Plantillas y constitution del proyecto
+├── specs/                 SPEC-01 a SPEC-06: spec.md, plan.md y tasks.md
+├── docs/
+│   ├── analisis/          Actores, requerimientos, casos de uso, historias
+│   ├── diseno/            Componentes, arquitectura y diagramas C4
+│   ├── ux/                Wireframes y flujo de pantallas
+│   ├── trazabilidad/      Criterio de aceptación, tarea, prueba y resultado
+│   ├── pruebas/           Capturas y resultados de las pruebas
+│   └── evidencia-ia/      Uso de IA por integrante
+└── src/
+    ├── SistemaTurnos.sln
+    ├── CrearBaseDatos.sql
+    ├── SistemaTurnos.Domain/
+    ├── SistemaTurnos.Application/
+    ├── SistemaTurnos.Infrastructure/
+    └── SistemaTurnos.Web/
 ```
 
-Alternativa con Chrome instalado, en PowerShell: `$env:PLAYWRIGHT_CHANNEL='chrome'; npm test`. El servidor de archivos se inicia y cierra automáticamente en un puerto local libre; no iniciar `npm start` para ejecutar las pruebas. Playwright controla un navegador sin interfaz. Cada caso usa una página y fixture independientes. La suite regenera seis capturas en `capturas/`.
+## Cómo ejecutar la aplicación
 
-### Alcance real
+### Requisitos
 
-Las pruebas son de interfaz contra una API simulada, definida únicamente en `tests/frontend/fixture.cjs`. La fixture no forma parte de wwwroot ni se sirve al usuario. Verifican solicitudes, representación de datos y errores, actualizaciones, confirmación, bloqueo durante solicitudes y manejo seguro de texto. No prueban reglas reales del backend ni una base de datos; la recarga conserva datos en la fixture del proceso de pruebas, no demuestra persistencia durable.
+- [.NET SDK 10](https://dotnet.microsoft.com/download)
+- SQL Server (Developer o Express) y SSMS, o la herramienta `sqlcmd`
+- Git
 
-### Matriz de trazabilidad
+### 1. Clonar el repositorio
 
-| Especificación | Casos automatizados (título en acceptance.test.cjs) | Evidencia | Pendiente de integración real |
-| --- | --- | --- | --- |
-| SPEC-01 | estado vacío, registro, mayúsculas, duplicado y espacios; recarga | 01-inicio.png | Unicidad y persistencia durable |
-| SPEC-02 | selección obligatoria, nombre opcional, número y orden; recarga | 02-fila.png | Reinicio diario, >999, correlativo atómico, timestamps y persistencia |
-| SPEC-03 | selección, fila, consulta repetida, exclusión provista por API, cambio de servicio | 02-fila.png | Filtro real día/estado/servicio y desempate |
-| SPEC-04 | llamar primero, bloquear segunda llamada, fila vacía, atención de otro día, recarga | 03-atencion.png | Selección FIFO, exclusividad concurrente, llamada y persistencia |
-| SPEC-05 | finalizar, Ninguno, no llamar automáticamente, error sin atención | 06-finalizada.png | Estado terminal, timestamps y persistencia |
-| SPEC-06 | conservar, Escape, confirmar, renumerar; conflicto de estado | 04-confirmacion.png | Validación atómica, registro cancelado persistente y no reutilización real |
-| Transversal | conexión y recuperación; transporte/JSON; texto seguro; bloqueo de solicitud; etiquetas, teclado y móvil | 05-movil.png | Revisión humana, lector de pantalla y otros navegadores |
+```powershell
+git clone https://github.com/DeuceloR18/ProyectoFinalAnalisisII.git
+cd ProyectoFinalAnalisisII
+```
 
-Las imágenes muestran estados observados; las aserciones ejecutables verifican resultados de acciones. No se presenta una captura previa como evidencia del estado final. Los tiempos de uso de los criterios de éxito requieren prueba humana cronometrada; la duración de automatización no los sustituye.
+### 2. Compilar
 
-### Lista de aceptación integrada pendiente
+```powershell
+dotnet build src\SistemaTurnos.sln
+```
 
-1. Conectar el backend real al contrato de `src/Turnos.Web/README.md` y repetir RF01-RF06 con base vacía.
-2. Registrar servicios con espacios, prefijos en minúscula y duplicados; comprobar el rechazo sin cambios.
-3. Generar turnos de dos servicios; cambiar la fecha con reloj controlado del backend, superar 999 y probar dos solicitudes concurrentes.
-4. Sembrar turnos de otro día/estado/servicio y con timestamp idéntico; comprobar filtro y orden sin modificar datos.
-5. Llamar con fila vacía, sin selección y con turno activo de ayer; finalizar únicamente el actual sin alterar otros servicios.
-6. Cancelar y rechazar la confirmación; cambiar estado desde otra sesión antes de confirmar; comprobar rechazo sin sobrescribir datos.
-7. Reiniciar el proceso y la base de aplicación; verificar conservación de servicios, números, nombres, estados y todas las fechas.
-8. Revisión humana del código generado y prueba de uso cronometrada antes de integrar a main.
+Debe terminar con `Build succeeded`.
 
-## English
+### 3. Crear la base de datos
 
-Run `npm ci` and `npm test` from the repository root with Node.js 20+ and Edge installed. Set PLAYWRIGHT_CHANNEL to chrome to use installed Chrome. The test suite automatically starts/stops a local file server, opens isolated headless browser pages, and regenerates six screenshots.
+Ejecuta el script `src\CrearBaseDatos.sql` en tu instancia de SQL Server. Con SSMS: ábrelo y pulsa F5. Con `sqlcmd` (instancia predeterminada):
 
-These are frontend acceptance tests against an isolated API double, not end-to-end tests of a .NET backend or database. They cover the UI scenarios mapped in the table above: service registration/errors, ticket generation, queue/current rendering, calling/completion, cancellation confirmation/conflicts, transport failures, safe text, pending-request locking, keyboard and mobile layout. Reload checks server re-fetching from the fixture, not durable storage.
+```powershell
+sqlcmd -S localhost -E -C -i src\CrearBaseDatos.sql
+```
 
-Real-backend acceptance remains pending for uniqueness, atomic numbering/concurrency, daily reset, values above 999, queue filtering/tie-breaking, terminal states, timestamps, cross-service isolation and durable persistence. The numbered checklist above specifies these integration checks. Human review, screen-reader checks and timed receptionist usability tests remain necessary before main integration. Screenshots illustrate observed states; executable assertions validate action results.
+Anota el nombre de la base de datos que crea el script (`NOMBRE_BASE`).
+
+### 4. Configurar la cadena de conexión
+
+No modifiques `appsettings.json`. Define tu propia cadena en la terminal antes de ejecutar.
+
+SQL Server instancia predeterminada (Developer):
+
+```powershell
+$env:ConnectionStrings__DefaultConnection = "Server=localhost;Database=NOMBRE_BASE;Trusted_Connection=True;TrustServerCertificate=True;"
+```
+
+SQL Server Express:
+
+```powershell
+$env:ConnectionStrings__DefaultConnection = "Server=.\SQLEXPRESS;Database=NOMBRE_BASE;Trusted_Connection=True;TrustServerCertificate=True;"
+```
+
+Si tienes ambas instancias instaladas, usa la misma en el script y en la cadena de conexión. Cambia `NOMBRE_BASE` por el nombre real de la base.
+
+Tambien se puede hacer manual, conectado al servidor en SQL server
+Ejecutar el scrip de la db 
+en appsettings.js colocar el nombre del servidor ya sea localhost o SQLEXPRESS y ejecutar.
+
+### 5. Ejecutar
+
+```powershell
+dotnet run --project src\SistemaTurnos.Web
+```
+
+Abre en el navegador la dirección que indique la consola (`Now listening on: http://localhost:PUERTO`).
+
+### Problemas frecuentes
+
+| Error | Causa probable |
+|---|---|
+| Error 26 o `A network-related error` | El nombre del servidor en la cadena no coincide con tu instancia |
+| `Cannot open database` | El nombre de la base no coincide o no se ejecutó el script |
+| `MSB1003` al compilar | Ejecuta `dotnet build` apuntando a `src\SistemaTurnos.sln` |
+
+## Cómo probar el flujo
+
+1. Registrar un servicio, por ejemplo "Caja" con prefijo `c` (se guarda como `C`).
+2. Generar dos turnos para ese servicio: `C-001` y `C-002`.
+3. Consultar la fila de espera.
+4. Llamar siguiente: `C-001` pasa a En atención.
+5. Finalizar atención: el turno actual vuelve a "Ninguno".
+6. Cancelar un turno en espera y confirmar.
+
+## Proceso SDD
+
+El desarrollo siguió la cadena: problema, requerimiento, especificación, diseño, tarea, implementación y prueba.
+
+- La **constitution** con las reglas del proyecto está en `.specify/memory/constitution.md`.
+- Cada especificación está en `specs/00X-.../` con su `spec.md` (comportamiento y criterios de aceptación), `plan.md` (diseño técnico) y `tasks.md` (tareas).
+- La relación entre criterios, tareas, pruebas y resultados está en `docs/trazabilidad/trazabilidad.md`.
+- La evidencia de las pruebas de aceptación está en `docs/pruebas/capturas/`.
+
+## Estado y limitaciones
+
+- La verificación del sistema integrado se hizo con pruebas de aceptación manuales con capturas. **No hay pruebas automatizadas del backend** (Domain, Application, API ni integración con SQL Server): los `plan.md` las prevén, pero quedaron como trabajo pendiente.
+- Existen pruebas automatizadas de navegador para una interfaz alternativa (ver la sección siguiente), pero se ejecutan contra una API simulada y **no demuestran** el comportamiento del backend real ni la persistencia.
+- Los criterios que no se alcanzaron a ejecutar figuran como "No probado" en la tabla de trazabilidad.
+- Diferencias conocidas entre la interfaz y las especificaciones: (COMPLETAR, por ejemplo: la fila de espera no muestra la posición de cada turno; los campos del formulario no tienen etiqueta visible).
+- Funcionalidades fuera de alcance, no incluidas por no tener especificación aprobada: autenticación, reportes, pantalla pública para clientes y edición o eliminación de servicios.
+
+## Documentación de interfaz y pruebas del prototipo (LECHUGA)
+
+El repositorio incluye una interfaz de recepción alternativa (`src/Turnos.Web`), con wireframes y pruebas de navegador. Esa interfaz **no forma parte de la solución que se ejecuta** (`SistemaTurnos.sln`) y está escrita para un contrato de API propuesto, distinto de las rutas implementadas en `SistemaTurnos.Web`. La interfaz que se entrega y se prueba con el backend real es la de `src/SistemaTurnos.Web/wwwroot`.
+
+- [Ejecución y contrato de API propuesto](src/Turnos.Web/README.md)
+- [Wireframes y flujo](docs/ux/wireframes.md)
+- [Pruebas, trazabilidad y pendientes de integración](docs/pruebas/README.md)
+- [Evidencia de uso de IA del integrante 4](docs/evidencia-ia/integrante-4.md)
+
+Para ver esa interfaz con su API simulada: `npm start` y abrir `http://127.0.0.1:5080`. Para sus pruebas: `npm ci` y `npm test`, con Node.js 20 o superior y Microsoft Edge instalado.
+
+## Uso de inteligencia artificial
+
+Se usó GitHub Spec Kit junto con GitHub Copilot para generar las especificaciones, los planes y las tareas, que fueron revisados y modificados por el equipo. El código es responsabilidad del equipo. La evidencia de las interacciones, las propuestas de la IA y las decisiones tomadas está en `docs/evidencia-ia/`.
